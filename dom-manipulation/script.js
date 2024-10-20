@@ -1,6 +1,7 @@
-const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
 let quotes = [];
+
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
@@ -11,9 +12,18 @@ function loadQuotes() {
     quotes = JSON.parse(storedQuotes);
   } else {
     quotes = [
-      { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Inspiration" },
-      { text: "Success is not the key to happiness. Happiness is the key to success.", category: "Happiness" },
-      { text: "In the middle of difficulty lies opportunity.", category: "Motivation" }
+      {
+        text: "The only limit to our realization of tomorrow is our doubts of today.",
+        category: "Inspiration",
+      },
+      {
+        text: "Success is not the key to happiness. Happiness is the key to success.",
+        category: "Happiness",
+      },
+      {
+        text: "In the middle of difficulty lies opportunity.",
+        category: "Motivation",
+      },
     ];
     saveQuotes();
   }
@@ -27,8 +37,9 @@ function notifyUser(message) {
   notification.style.margin = "10px 0";
   notification.style.border = "1px solid #d9534f";
   document.body.prepend(notification);
-  setTimeout(() => notification.remove(), 5000); 
+  setTimeout(() => notification.remove(), 5000);
 }
+
 function populateCategories() {
   const categoryFilter = document.getElementById("categoryFilter");
   categoryFilter.innerHTML = '<option value="all">All Categories</option>';
@@ -41,10 +52,14 @@ function populateCategories() {
     categoryFilter.appendChild(option);
   });
 }
+
 function filterQuotes() {
   const selectedCategory = document.getElementById("categoryFilter").value;
-  const filteredQuotes = selectedCategory === "all" ? quotes : quotes.filter(quote => quote.category === selectedCategory);
-  
+  const filteredQuotes =
+    selectedCategory === "all"
+      ? quotes
+      : quotes.filter(quote => quote.category === selectedCategory);
+
   const quoteDisplay = document.getElementById("quoteDisplay");
   if (filteredQuotes.length > 0) {
     const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
@@ -55,6 +70,7 @@ function filterQuotes() {
   }
   localStorage.setItem("lastSelectedCategory", selectedCategory);
 }
+
 function loadLastSelectedCategory() {
   const lastSelectedCategory = localStorage.getItem("lastSelectedCategory");
   if (lastSelectedCategory) {
@@ -62,14 +78,20 @@ function loadLastSelectedCategory() {
     filterQuotes();
   }
 }
+
 function addQuote() {
   const newQuoteText = document.getElementById("newQuoteText").value;
   const newQuoteCategory = document.getElementById("newQuoteCategory").value;
 
   if (newQuoteText !== "" && newQuoteCategory !== "") {
-    quotes.push({ text: newQuoteText, category: newQuoteCategory });
+    const newQuote = { text: newQuoteText, category: newQuoteCategory };
+
+    quotes.push(newQuote);
     saveQuotes();
     populateCategories();
+
+    postQuoteToServer(newQuote);
+
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
     alert("Quote added successfully!");
@@ -77,13 +99,37 @@ function addQuote() {
     alert("Please fill in both fields.");
   }
 }
+
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(quote),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to post quote to server.");
+    }
+
+    const data = await response.json();
+    console.log("Quote posted to server:", data);
+    return data;
+  } catch (error) {
+    console.error("Error posting quote:", error);
+    return null;
+  }
+}
+
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(API_URL);
     const data = await response.json();
     const serverQuotes = data.map(item => ({
-      text: item.title, 
-      category: "General" 
+      text: item.title,
+      category: "General",
     }));
     return serverQuotes;
   } catch (error) {
@@ -91,20 +137,21 @@ async function fetchQuotesFromServer() {
     return [];
   }
 }
+
 async function syncWithServer() {
   const serverQuotes = await fetchQuotesFromServer();
 
   if (serverQuotes && serverQuotes.length > 0) {
     let hasConflict = false;
-    const updatedQuotes = [...quotes]; 
+    const updatedQuotes = [...quotes];
 
     serverQuotes.forEach(serverQuote => {
       const existingQuote = quotes.find(q => q.text === serverQuote.text);
       if (!existingQuote) {
-        updatedQuotes.push(serverQuote); 
+        updatedQuotes.push(serverQuote);
       } else {
         hasConflict = true;
-       }
+      }
     });
 
     quotes = updatedQuotes;
@@ -116,16 +163,25 @@ async function syncWithServer() {
     }
   }
 }
-setInterval(syncWithServer, 10000);h
+
+setInterval(syncWithServer, 10000);
+
 function showRandomQuote() {
   filterQuotes();
 }
-document.addEventListener("DOMContentLoaded", function() {
+
+document.addEventListener("DOMContentLoaded", function () {
   loadQuotes();
   populateCategories();
   loadLastSelectedCategory();
 
-  document.getElementById("newQuote").addEventListener("click", showRandomQuote);
-  document.getElementById("exportQuotes").addEventListener("click", exportQuotesToJson);
-  document.getElementById("importFile").addEventListener("change", importFromJsonFile);
+  document
+    .getElementById("newQuote")
+    .addEventListener("click", showRandomQuote);
+  document
+    .getElementById("exportQuotes")
+    .addEventListener("click", exportQuotesToJson);
+  document
+    .getElementById("importFile")
+    .addEventListener("change", importFromJsonFile);
 });
