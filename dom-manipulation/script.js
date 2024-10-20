@@ -1,4 +1,4 @@
-const API_URL = 'https://your-real-server.com/api/quotes';
+const API_URL = 'https://jsonplaceholder.typicode.com/posts';
 
 let quotes = [];
 function saveQuotes() {
