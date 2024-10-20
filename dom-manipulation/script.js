@@ -157,6 +157,7 @@ async function syncQuotes() {
     quotes = updatedQuotes;
     saveQuotes();
     populateCategories();
+    notifyUser("Quotes synced with server!");
 
     if (hasConflict) {
       notifyUser("Data has been updated from the server. Conflicts resolved.");
