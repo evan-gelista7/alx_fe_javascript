@@ -138,7 +138,7 @@ async function fetchQuotesFromServer() {
   }
 }
 
-async function syncWithServer() {
+async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
 
   if (serverQuotes && serverQuotes.length > 0) {
@@ -164,7 +164,7 @@ async function syncWithServer() {
   }
 }
 
-setInterval(syncWithServer, 10000);
+setInterval(syncQuotes, 10000);
 
 function showRandomQuote() {
   filterQuotes();
