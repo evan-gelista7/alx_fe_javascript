@@ -37,6 +37,9 @@ function addQuote() {
     quotes.push({ text: newQuoteText, category: newQuoteCategory })
     saveQuotes();
     document.getElementById("newQuoteText").value = "";
+    document.getElementById("exportQuotes").addEventListener("click", exportQuotesToJson);
+    const importInput = document.getElementById("importFile");
+    importInput.addEventListener("change", importFromJsonFile);
     document.getElementById("newQuoteCategory").value = "";
 
     alert("Quote added successfully!");
